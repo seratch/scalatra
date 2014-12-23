@@ -1,17 +1,17 @@
-package org.scalatra
-package servlet
+package org.scalatra.servlet
 
 import scala.collection.mutable.Map
 import scala.collection.JavaConverters._
-import java.util.Enumeration
-import util.MutableMapWithIndifferentAccess
-import util.conversion.TypeConverter
+import org.scalatra.ScalatraException
+import org.scalatra.util.MutableMapWithIndifferentAccess
+import org.scalatra.util.conversion.TypeConverter
 
 /**
  * Adapts attributes from servlet objects (e.g., ServletRequest, HttpSession,
  * ServletContext) to a mutable map.
  */
 trait AttributesMap extends Map[String, Any] with MutableMapWithIndifferentAccess[Any] {
+
   protected def attributes: Attributes
 
   /**
@@ -50,8 +50,9 @@ trait AttributesMap extends Map[String, Any] with MutableMapWithIndifferentAcces
    * @return an value for the attributed associated with the key in the underlying servlet object,
    *         or throw an exception if the key doesn't exist
    */
-  def as[T](key: String)(implicit mf: Manifest[T], converter: TypeConverter[Any, T]): T =
+  def as[T](key: String)(implicit mf: Manifest[T], converter: TypeConverter[Any, T]): T = {
     getAs[T](key) getOrElse (throw new ScalatraException("Key " + key + " not found"))
+  }
 
   /**
    * Return the attribute associated with the key or throw an exception when nothing found
@@ -61,18 +62,20 @@ trait AttributesMap extends Map[String, Any] with MutableMapWithIndifferentAcces
    * @return an value for the attributed associated with the key in the underlying servlet object,
    *         or throw an exception if the key doesn't exist
    */
-  def getAsOrElse[T](key: String, default: => T)(implicit mf: Manifest[T], converter: TypeConverter[Any, T]): T =
+  def getAsOrElse[T](key: String, default: => T)(implicit mf: Manifest[T], converter: TypeConverter[Any, T]): T = {
     getAs[T](key) getOrElse default
+  }
 
   /**
    * Creates a new iterator over all attributes in the underlying servlet object.
    *
    * @return the new iterator
    */
-  def iterator: Iterator[(String, Any)] =
+  def iterator: Iterator[(String, Any)] = {
     attributes.getAttributeNames().asScala map { key =>
       (key, attributes.getAttribute(key))
     }
+  }
 
   /**
    * Sets an attribute on the underlying servlet object.
@@ -82,7 +85,7 @@ trait AttributesMap extends Map[String, Any] with MutableMapWithIndifferentAcces
    *
    * @return the map itself
    */
-  def +=(kv: (String, Any)) = {
+  def +=(kv: (String, Any)): AttributesMap.this.type = {
     attributes.setAttribute(kv._1, kv._2.asInstanceOf[AnyRef])
     this
   }
@@ -94,7 +97,7 @@ trait AttributesMap extends Map[String, Any] with MutableMapWithIndifferentAcces
    *
    * @return the map itself
    */
-  def -=(key: String) = {
+  def -=(key: String): AttributesMap.this.type = {
     attributes.removeAttribute(key)
     this
   }

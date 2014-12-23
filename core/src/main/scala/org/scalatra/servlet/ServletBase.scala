@@ -1,9 +1,9 @@
-package org.scalatra
-package servlet
+package org.scalatra.servlet
 
 import javax.servlet.ServletContext
 import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 import java.{ util => ju }
+import org.scalatra._
 import scala.collection.immutable.DefaultMap
 import scala.collection.JavaConverters._
 
@@ -15,13 +15,14 @@ trait ServletBase
     extends ScalatraBase
     with SessionSupport
     with Initializable {
+
   type ConfigT <: {
     def getServletContext(): ServletContext
     def getInitParameter(name: String): String
     def getInitParameterNames(): ju.Enumeration[String]
   }
 
-  protected implicit def configWrapper(config: ConfigT) = new Config {
+  protected implicit def configWrapper(config: ConfigT): Config = new Config {
     def context = config.getServletContext
 
     object initParameters extends DefaultMap[String, String] {
@@ -33,7 +34,7 @@ trait ServletBase
     }
   }
 
-  override def handle(request: HttpServletRequest, response: HttpServletResponse) {
+  override def handle(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     // As default, the servlet tries to decode params with ISO_8859-1.
     // It causes an EOFException if params are actually encoded with the 
     // other code (such as UTF-8)
@@ -41,4 +42,5 @@ trait ServletBase
       request.setCharacterEncoding(defaultCharacterEncoding)
     super.handle(request, response)
   }
+
 }

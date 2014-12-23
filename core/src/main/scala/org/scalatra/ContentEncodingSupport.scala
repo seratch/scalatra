@@ -1,11 +1,11 @@
 package org.scalatra
+
 import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
 
 /**
  * Scalatra handler for gzipped responses.
  */
-trait ContentEncodingSupport extends Handler {
-  self: ScalatraBase =>
+trait ContentEncodingSupport extends Handler { self: ScalatraBase =>
 
   /** Encodes the response if necessary. */
   private def encodedResponse(req: HttpServletRequest, res: HttpServletResponse): HttpServletResponse =
@@ -21,9 +21,10 @@ trait ContentEncodingSupport extends Handler {
     enc <- ContentEncoding.forName(name)
   } yield enc(req)).getOrElse(req)
 
-  abstract override def handle(req: HttpServletRequest, res: HttpServletResponse) {
+  abstract override def handle(req: HttpServletRequest, res: HttpServletResponse): Unit = {
     withRequestResponse(req, res) {
       super.handle(decodedRequest(req), encodedResponse(req, res))
     }
   }
+
 }

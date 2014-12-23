@@ -1,11 +1,13 @@
-package org.scalatra
-package servlet
+package org.scalatra.servlet
 
-import javax.servlet.{ AsyncContext, AsyncEvent }
+import javax.servlet.AsyncEvent
 import javax.servlet.http.{ HttpServletRequest, HttpServletResponse }
+import org.scalatra._
 
 object AsyncSupport {
+
   val ExecutionContextKey = "org.scalatra.ExecutionContext"
+
 }
 
 trait AsyncSupport extends ServletBase with ScalatraAsyncSupport {
@@ -15,7 +17,7 @@ trait AsyncSupport extends ServletBase with ScalatraAsyncSupport {
    */
   protected def asynchronously(f: => Any): Action
 
-  protected def onAsyncEvent(event: AsyncEvent)(thunk: => Any) {
+  protected def onAsyncEvent(event: AsyncEvent)(thunk: => Any): Unit = {
     withRequest(event.getSuppliedRequest.asInstanceOf[HttpServletRequest]) {
       withResponse(event.getSuppliedResponse.asInstanceOf[HttpServletResponse]) {
         thunk
@@ -23,7 +25,7 @@ trait AsyncSupport extends ServletBase with ScalatraAsyncSupport {
     }
   }
 
-  protected def withinAsyncContext(context: javax.servlet.AsyncContext)(thunk: => Any) {
+  protected def withinAsyncContext(context: javax.servlet.AsyncContext)(thunk: => Any): Unit = {
     withRequest(context.getRequest.asInstanceOf[HttpServletRequest]) {
       withResponse(context.getResponse.asInstanceOf[HttpServletResponse]) {
         thunk
@@ -98,4 +100,5 @@ trait AsyncSupport extends ServletBase with ScalatraAsyncSupport {
    */
   def asyncPatch(transformers: RouteTransformer*)(block: => Any): Route =
     patch(transformers: _*)(asynchronously(block)())
+
 }

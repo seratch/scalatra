@@ -1,27 +1,21 @@
 package org.scalatra
 
-import collection.JavaConverters._
 import java.util.concurrent.ConcurrentHashMap
-import org.scalatra.util.RicherString._
 import java.util.Locale.ENGLISH
-import scala.collection.concurrent
-import collection.mutable
 import javax.servlet.http.{ HttpServletResponse, HttpServletRequest }
+import org.scalatra.ApiFormats.FormatKey
+import org.scalatra.util.RicherString._
+import scala.collection.JavaConverters._
+import scala.collection.concurrent
 
 object ApiFormats {
+
   /**
    * The request attribute key in which the format is stored.
    */
   val FormatKey = "org.scalatra.FormatKey"
 
 }
-
-//trait ApiFormatsContext {
-//  def formats: mutable.ConcurrentMap[String, String]
-//  def mimeTypes: mutable.ConcurrentMap[String, String]
-//  def format: String
-//  def responseFormat: String
-//}
 
 /**
  * Adds support for mapping and inferring formats to content types.
@@ -77,7 +71,7 @@ trait ApiFormats extends ScalatraBase {
     "video/x-flv" -> "flv"
   ).asJava).asScala
 
-  protected def addMimeMapping(mime: String, extension: String) {
+  protected def addMimeMapping(mime: String, extension: String): Unit = {
     mimeTypes += mime -> extension
     formats += extension -> mime
   }
@@ -165,10 +159,12 @@ trait ApiFormats extends ScalatraBase {
     conditions.isEmpty || (conditions filter { s => formats.get(s).isDefined } contains contentType)
   }
 
-  private def getFormat(implicit request: HttpServletRequest, response: HttpServletResponse): String =
-    getFromResponseHeader orElse getFromParams orElse getFromAcceptHeader getOrElse defaultFormat.name
-
-  import ApiFormats.FormatKey
+  private def getFormat(implicit request: HttpServletRequest, response: HttpServletResponse): String = {
+    getFromResponseHeader orElse
+      getFromParams orElse
+      getFromAcceptHeader getOrElse
+      defaultFormat.name
+  }
 
   protected override def withRouteMultiParams[S](matchedRoute: Option[MatchedRoute])(thunk: => S): S = {
     val originalParams = multiParams
@@ -185,8 +181,9 @@ trait ApiFormats extends ScalatraBase {
     }
   }
 
-  def requestFormat(implicit request: HttpServletRequest): String =
+  def requestFormat(implicit request: HttpServletRequest): String = {
     request.contentType flatMap (t => t.split(";").headOption flatMap mimeTypes.get) getOrElse format
+  }
 
   /**
    * Returns the request-scoped format.  If not explicitly set, the format is:

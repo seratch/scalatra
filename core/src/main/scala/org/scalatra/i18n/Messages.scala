@@ -1,14 +1,19 @@
-package org.scalatra
-package i18n
+package org.scalatra.i18n
 
 import java.util.Locale
 import java.util.ResourceBundle
 import java.util.MissingResourceException
 
 object Messages {
-  def apply(locale: Locale = Locale.getDefault, bundlePath: String = "i18n/messages"): Messages = new Messages(locale, bundlePath)
+
+  def apply(locale: Locale = Locale.getDefault, bundlePath: String = "i18n/messages"): Messages = {
+    new Messages(locale, bundlePath)
+  }
+
 }
+
 class Messages(locale: Locale, bundlePath: String = "i18n/messages") {
+
   private[this] val bundle = ResourceBundle.getBundle(bundlePath, locale)
 
   /**
@@ -55,4 +60,5 @@ class Messages(locale: Locale, bundlePath: String = "i18n/messages") {
       case e: MissingResourceException => default
     }
   }
+
 }

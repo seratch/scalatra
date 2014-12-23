@@ -1,11 +1,11 @@
 package org.scalatra
 
-import collection._
-import java.util.{ Calendar, TimeZone, Date, Locale }
-import javax.servlet.http.{ HttpServletRequest, HttpServletResponse, Cookie => ServletCookie }
-import servlet.ServletApiImplicits
-import util.DateUtil
-import util.RicherString._
+import java.util.{ Date, Locale }
+import javax.servlet.http.HttpServletResponse
+import org.scalatra.servlet.ServletApiImplicits
+import org.scalatra.util.DateUtil
+import org.scalatra.util.RicherString._
+import scala.collection._
 
 case class CookieOptions(
   domain: String = "",
@@ -18,34 +18,51 @@ case class CookieOptions(
   encoding: String = "UTF-8")
 
 object Cookie {
+
   @volatile private[this] var _currentTimeMillis: Option[Long] = None
+
   def currentTimeMillis = _currentTimeMillis getOrElse System.currentTimeMillis
+
   def currentTimeMillis_=(ct: Long) = _currentTimeMillis = Some(ct)
+
   def freezeTime() = _currentTimeMillis = Some(System.currentTimeMillis())
+
   def unfreezeTime() = _currentTimeMillis = None
+
   def formatExpires(date: Date) = DateUtil.formatDate(date, "EEE, dd MMM yyyy HH:mm:ss zzz")
+
 }
-case class Cookie(name: String, value: String)(implicit cookieOptions: CookieOptions = CookieOptions()) {
-  import Cookie._
+
+case class Cookie(name: String, value: String)(
+    implicit cookieOptions: CookieOptions = CookieOptions()) {
+
+  import org.scalatra.Cookie._
 
   val options = cookieOptions
 
-  def toCookieString = {
-    val sb = new StringBuffer
+  def toCookieString: String = {
+    val sb = new StringBuilder
     sb append name append "="
     sb append value
 
-    if (cookieOptions.domain.nonBlank && cookieOptions.domain != "localhost")
+    if (cookieOptions.domain.nonBlank && cookieOptions.domain != "localhost") {
       sb.append("; Domain=").append(
-        (if (!cookieOptions.domain.startsWith(".")) "." + cookieOptions.domain else cookieOptions.domain).toLowerCase(Locale.ENGLISH)
+        (if (!cookieOptions.domain.startsWith(".")) "." + cookieOptions.domain
+        else cookieOptions.domain).toLowerCase(Locale.ENGLISH)
       )
+    }
 
     val pth = cookieOptions.path
-    if (pth.nonBlank) sb append "; Path=" append (if (!pth.startsWith("/")) {
-      "/" + pth
-    } else { pth })
+    if (pth.nonBlank) {
+      sb append "; Path=" append (
+        if (!pth.startsWith("/")) "/" + pth
+        else pth
+      )
+    }
 
-    if (cookieOptions.comment.nonBlank) sb append ("; Comment=") append cookieOptions.comment
+    if (cookieOptions.comment.nonBlank) {
+      sb append ("; Comment=") append cookieOptions.comment
+    }
 
     appendMaxAge(sb, cookieOptions.maxAge, cookieOptions.version)
 
@@ -54,7 +71,7 @@ case class Cookie(name: String, value: String)(implicit cookieOptions: CookieOpt
     sb.toString
   }
 
-  private[this] def appendMaxAge(sb: StringBuffer, maxAge: Int, version: Int) = {
+  private[this] def appendMaxAge(sb: StringBuilder, maxAge: Int, version: Int) = {
     val dateInMillis = maxAge match {
       case a if a < 0 => None // we don't do anything for max-age when it's < 0 then it becomes a session cookie
       case 0 => Some(0L) // Set the date to the min date for the system
@@ -69,8 +86,9 @@ case class Cookie(name: String, value: String)(implicit cookieOptions: CookieOpt
     agedOpt getOrElse sb
   }
 
-  private[this] def appendExpires(sb: StringBuffer, expires: Date) =
+  private[this] def appendExpires(sb: StringBuilder, expires: Date): StringBuilder = {
     sb append "; Expires=" append formatExpires(expires)
+  }
 }
 
 class SweetCookies(private[this] val reqCookies: Map[String, String], private[this] val response: HttpServletResponse) extends ServletApiImplicits {
@@ -110,17 +128,23 @@ class SweetCookies(private[this] val reqCookies: Map[String, String], private[th
 }
 
 object CookieSupport {
+
   val SweetCookiesKey = "org.scalatra.SweetCookies"
+
   val CookieOptionsKey = "org.scalatra.CookieOptions"
+
 }
 
 trait CookieContext { self: ScalatraContext =>
-  import CookieSupport._
+
+  import org.scalatra.CookieSupport._
+
   implicit def cookieOptions: CookieOptions = servletContext.get(CookieOptionsKey).orNull.asInstanceOf[CookieOptions]
 
   def cookies = request.get(SweetCookiesKey).orNull.asInstanceOf[SweetCookies]
 
 }
+
 @deprecated("You can remove this mixin, it's included in core by default", "2.2")
 trait CookieSupport { self: ScalatraBase =>
 }

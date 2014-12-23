@@ -1,28 +1,26 @@
-package org.scalatra
-package servlet
+package org.scalatra.servlet
 
 import java.net.{ MalformedURLException, URL }
-import java.util.EnumSet
-import javax.servlet.{ ServletConfig, DispatcherType, Filter, ServletContext }
-import javax.servlet.http.{ HttpServletResponse, HttpServlet, HttpServletRequest }
-import scala.collection.JavaConverters._
+import javax.servlet.{ DispatcherType, Filter, ServletContext }
+import javax.servlet.http.{ HttpServlet, HttpServletRequest }
 import scala.collection.mutable
 import java.{ util => jutil }
-import org.scalatra.util
+import org.scalatra._
 
 /**
  * Extension methods to the standard ServletContext.
  */
-case class RichServletContext(sc: ServletContext) extends AttributesMap {
-  protected def attributes = sc
+case class RichServletContext(sc: ServletContext)
+    extends AttributesMap {
+
+  protected def attributes: ServletContext = sc
 
   /**
    * Optionally returns a URL to the resource mapped to the given path.  This
    * is a wrapper around `getResource`.
    *
    * @param path the path to the resource
-   * @return the resource located at the path, or None if there is no resource
-   * at that path.
+   * @return the resource located at the path, or None if there is no resource at that path.
    */
   def resource(path: String): Option[URL] =
     try {
@@ -43,7 +41,7 @@ case class RichServletContext(sc: ServletContext) extends AttributesMap {
     resource(path)
   }
 
-  private[this] def pathMapping(urlPattern: String) = urlPattern match {
+  private[this] def pathMapping(urlPattern: String): String = urlPattern match {
     case s if s.endsWith("/*") => s
     case s if s.endsWith("/") => s + "*"
     case s => s + "/*"

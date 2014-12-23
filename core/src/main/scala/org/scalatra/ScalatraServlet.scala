@@ -1,15 +1,17 @@
 package org.scalatra
 
-import servlet.ServletBase
 import javax.servlet._
 import javax.servlet.http._
+import org.scalatra.servlet.ServletBase
 import org.scalatra.util.RicherString._
 import scala.util.control.Exception.catching
 
 object ScalatraServlet {
 
+  import org.scalatra.servlet.ServletApiImplicits._
+
   val RequestPathKey = "org.scalatra.ScalatraServlet.requestPath"
-  import servlet.ServletApiImplicits._
+
   def requestPath(request: HttpServletRequest): String = {
     require(request != null, "The request can't be null for getting the request path")
     def startIndex(r: HttpServletRequest) =
@@ -50,7 +52,8 @@ abstract class ScalatraServlet
     extends HttpServlet
     with ServletBase
     with Initializable {
-  override def service(request: HttpServletRequest, response: HttpServletResponse) {
+
+  override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     handle(request, response)
   }
 
@@ -65,9 +68,9 @@ abstract class ScalatraServlet
    * All other servlet mappings likely want to return request.getServletPath.
    * Custom implementations are allowed for unusual cases.
    */
-  def requestPath(implicit request: HttpServletRequest) = ScalatraServlet.requestPath(request)
+  def requestPath(implicit request: HttpServletRequest): String = ScalatraServlet.requestPath(request)
 
-  protected def routeBasePath(implicit request: HttpServletRequest) = {
+  protected def routeBasePath(implicit request: HttpServletRequest): String = {
     require(config != null, "routeBasePath requires the servlet to be initialized")
     require(request != null, "routeBasePath requires an active request to determine the servlet path")
 
@@ -88,10 +91,11 @@ abstract class ScalatraServlet
    * Attempts to find a static resource matching the request path.  Override
    * to return None to stop this.
    */
-  protected def serveStaticResource(): Option[Any] =
+  protected def serveStaticResource(): Option[Any] = {
     servletContext.resource(request) map { _ =>
       servletContext.getNamedDispatcher("default").forward(request, response)
     }
+  }
 
   /**
    * Called by default notFound if no routes matched and no static resource
@@ -111,17 +115,18 @@ abstract class ScalatraServlet
 
   type ConfigT = ServletConfig
 
-  override def init(config: ServletConfig) {
+  override def init(config: ServletConfig): Unit = {
     super.init(config)
     initialize(config) // see Initializable.initialize for why
   }
 
-  override def initialize(config: ServletConfig) {
+  override def initialize(config: ServletConfig): Unit = {
     super.initialize(config)
   }
 
-  override def destroy() {
+  override def destroy(): Unit = {
     shutdown()
     super.destroy()
   }
+
 }

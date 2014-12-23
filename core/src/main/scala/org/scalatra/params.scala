@@ -2,7 +2,6 @@ package org.scalatra
 
 import util.conversion._
 import java.util.Date
-import util.{ MultiMap, MapWithIndifferentAccess, MultiMapHeadView }
 
 /**
  * Add some implicits
@@ -34,8 +33,7 @@ trait ScalatraParamsImplicits {
   sealed class TypedMultiParams(multiParams: MultiParams) {
 
     def getAs[T <: Any](name: String)(implicit tc: TypeConverter[String, T]): Option[Seq[T]] = multiParams.get(name) map {
-      s =>
-        s.flatMap(tc.apply(_))
+      s => s.flatMap(tc.apply(_))
     }
 
     def getAs[T <: Date](nameAndFormat: (String, String)): Option[Seq[Date]] = getAs(nameAndFormat._1)(stringToDate(nameAndFormat._2))

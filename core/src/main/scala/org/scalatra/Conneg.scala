@@ -1,8 +1,8 @@
 package org.scalatra
+
 import java.nio.charset.Charset
 import java.text.DecimalFormat
 import javax.servlet.http.HttpServletRequest
-
 import scala.util.Try
 import scala.util.parsing.combinator.RegexParsers
 
@@ -11,6 +11,7 @@ case class Conneg[T](value: T, q: Float = 1)
 
 /** Defines type classes and helper methods for well known content-negotiation headers. */
 object Conneg {
+
   // - Header parsing --------------------------------------------------------------------------------------------------
   // -------------------------------------------------------------------------------------------------------------------
   /** Used to parse a specific type of content negotiation header.*/
@@ -117,5 +118,7 @@ object Conneg {
   }
 
   def preferredCharset(implicit req: HttpServletRequest): Option[Charset] = preferredValue[Charset](AcceptCharset)
+
   def acceptedCharsets(implicit req: HttpServletRequest): List[Conneg[Charset]] = values(AcceptCharset)
+
 }

@@ -2,8 +2,8 @@ package org.scalatra
 
 import scala.util.matching.Regex
 import scala.util.parsing.combinator._
-import util.MultiMap
-import util.RicherString._
+import org.scalatra.util.MultiMap
+import org.scalatra.util.RicherString._
 
 /**
  * A route matcher is evaluated in the context it was created and returns a

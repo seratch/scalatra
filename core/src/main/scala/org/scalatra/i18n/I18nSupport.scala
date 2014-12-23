@@ -1,10 +1,11 @@
-package org.scalatra
-package i18n
+package org.scalatra.i18n
 
 import java.util.Locale
 import javax.servlet.http.HttpServletRequest
+import org.scalatra._
 
 object I18nSupport {
+
   val LocaleKey = "org.scalatra.i18n.locale"
 
   val UserLocalesKey = "org.scalatra.i18n.userLocales"
@@ -12,11 +13,9 @@ object I18nSupport {
   val MessagesKey = "messages"
 }
 
-trait I18nSupport {
+trait I18nSupport { this: ScalatraBase =>
 
-  this: ScalatraBase =>
-
-  import I18nSupport._
+  import org.scalatra.i18n.I18nSupport._
 
   def locale(implicit request: HttpServletRequest): Locale = if (request == null) {
     throw new ScalatraException("There needs to be a request in scope to call locale")
@@ -66,7 +65,6 @@ trait I18nSupport {
    * If it's not found, then look at Accept-Language header.
    *
    * Locale strings are transformed to [[java.util.Locale]]
-   *
    */
   private def resolveHttpLocale: Option[Locale] = {
     (params.get(LocaleKey) match {
@@ -117,7 +115,6 @@ trait I18nSupport {
    * @param in a string like en_GB or de_DE
    */
   private def localeFromString(in: String): Locale = {
-
     val token = in.split("_")
     new Locale(token.head, token.last)
   }
@@ -125,4 +122,5 @@ trait I18nSupport {
   private def defaultLocale: Locale = {
     Locale.getDefault
   }
+
 }
